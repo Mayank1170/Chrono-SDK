@@ -1,0 +1,38 @@
+{
+  "name": "chrono",
+  "version": "1.0.0",
+  "description": "SDK for implementing pay-per-second billing with Streamflow",
+  "main": "index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "dev": "tsc --watch",
+    "lint": "eslint 'src/**/*.{js,ts}'",
+    "test": "jest",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "blockchain",
+    "solana",
+    "streamflow",
+    "pay-per-second",
+    "micropayments"
+  ],
+  "author": "Mayank Agarwal",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.5",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "eslint": "^9.21.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@streamflow/stream": "^7.4.13"
+  }
+}
