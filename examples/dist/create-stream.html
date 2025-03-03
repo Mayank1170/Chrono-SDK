@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay-Per-Second SDK Demo</title>
+    <style>body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      button {
+        margin: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+      }
+      #output {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #333;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+      }</style>
+  </head>
+  <body>
+    <h1>Pay-Per-Second SDK Demo</h1>
+    <button id="connectWallet">Connect Wallet</button>
+    <button id="startStream" disabled="">Start Stream</button>
+    <button id="stopStream" disabled="">Stop Stream</button>
+    <p id="output">Click "Connect Wallet" to begin.</p>
+
+    <script type="module">
+      import { StreamflowSolana, getBN } from "https://cdn.jsdelivr.net/npm/@streamflow/stream";
+
+      const rpcUrl = "https://api.devnet.solana.com";
+      const client = new StreamflowSolana.SolanaStreamClient(rpcUrl);
+
+      let senderWallet = null; // Connected wallet instance
+      let streamId = null; // Active stream ID
+
+      // Display messages on the page
+      function displayMessage(message, isSuccess = true) {
+        const output = document.getElementById("output");
+        output.textContent = message;
+        output.className = isSuccess ? "success" : "error";
+      }
+
+      // Connect Wallet Button
+      document.getElementById("connectWallet").addEventListener("click", async () => {
+        try {
+          if (!window.solana || !window.solana.isPhantom) {
+            displayMessage("Phantom Wallet not found. Please install it.", false);
+            return;
+          }
+
+          // Connect to Phantom Wallet
+          const response = await window.solana.connect();
+          senderWallet = window.solana;
+
+          console.log("Wallet connected:", response.publicKey.toString());
+          displayMessage(`Wallet connected: ${response.publicKey.toString()}`);
+          document.getElementById("startStream").disabled = false;
+          document.getElementById("stopStream").disabled = false;
+        } catch (error) {
+          console.error("Error connecting wallet:", error);
+          displayMessage("Error connecting wallet. Check the console for details.", false);
+        }
+      });
+
+      // Start Stream Button
+      document.getElementById("startStream").addEventListener("click", async () => {
+        if (!senderWallet) {
+          displayMessage("Please connect your wallet first.", false);
+          return;
+        }
+
+        const recipientAddress = "JDCUs2MJ7kbvi5kBQ7Jeo5yEtXMSBfT23PKg8wj6uPdC"; // Replace with a valid recipient address
+        const tokenId = "strmRqUCoQUgGUan5YhzUZa6KqdzwX5L6FpUxfmKg5m"; // Replace with a valid Devnet token mint address
+        const totalAmount = 100; // Total amount of tokens
+        const ratePerSecond = 0.01; // Amount deducted per second
+
+        try {
+          const createParams = {
+            recipient: recipientAddress,
+            tokenId: tokenId,
+            start: Math.floor(Date.now() / 1000),
+            amount: getBN(totalAmount, 9),
+            period: 1,
+            amountPerPeriod: getBN(ratePerSecond, 9),
+            name: "Pay-per-second stream",
+            cliff: 0,
+            cliffAmount: getBN(0, 9),
+            canTopup: true,
+            cancelableBySender: true,
+            cancelableByRecipient: false,
+            transferableBySender: false,
+            transferableByRecipient: false,
+            automaticWithdrawal: true,
+            withdrawalFrequency: 60,
+          };
+
+          const result = await client.create(createParams, senderWallet);
+          streamId = result.id;
+
+          console.log("Stream created successfully:", result);
+          displayMessage(`Stream created successfully! ID: ${streamId}`);
+        } catch (error) {
+          console.error("Error creating stream:", error);
+          displayMessage("Error creating stream. Check the console for details.", false);
+        }
+      });
+
+      // Stop Stream Button
+      document.getElementById("stopStream").addEventListener("click", async () => {
+        if (!streamId) {
+          displayMessage("No active stream to stop.", false);
+          return;
+        }
+
+        try {
+          await client.cancel({ id: streamId }, senderWallet);
+          console.log(`Stream ${streamId} stopped successfully.`);
+          displayMessage(`Stream ${streamId} stopped successfully.`);
+          streamId = null; // Reset stream ID
+        } catch (error) {
+          console.error("Error stopping stream:", error);
+          displayMessage("Error stopping stream. Check the console for details.", false);
+        }
+      });
+    </script>
+  </body>
+</html>

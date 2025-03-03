@@ -4,6 +4,7 @@
   "description": "SDK for implementing pay-per-second billing with Streamflow",
   "main": "index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
@@ -22,6 +23,8 @@
   "author": "Mayank Agarwal",
   "license": "ISC",
   "devDependencies": {
+    "@types/bn.js": "^5.1.6",
+    "@types/events": "^3.0.3",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.5",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
@@ -33,6 +36,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@streamflow/stream": "^7.4.13"
+    "@streamflow/stream": "^7.4.13",
+    "bn.js": "^5.2.1"
   }
 }

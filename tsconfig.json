@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
+    "module": "ESNext",
+    "target": "ES2020",
     "lib": ["es2020", "dom"],
     "declaration": true,
     "outDir": "./dist",
@@ -14,6 +14,10 @@
     "moduleResolution": "node",
     "sourceMap": true
   },
-  "include": ["src/**/*"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": ["src/**/*", "examples"],
   "exclude": ["node_modules", "dist", "tests"]
 }
