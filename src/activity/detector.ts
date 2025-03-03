@@ -1,18 +1,14 @@
-// src/activity/detector.ts
-import { EventEmitter } from 'events';
-import { ActivityConfig } from '../core/types';
+import { EventEmitter } from "events";
+import { ActivityConfig } from "../core/types";
 
-/**
- * Interface defining callbacks that can be registered for a stream
- */
+// Interface defining callbacks that can be registered for a stream
 export interface StreamActivityCallbacks {
   onIdle: () => void;
   onActive: () => void;
 }
 
-/**
- * Base abstract class for activity detectors
- */
+// Base abstract class for activity detectors
+
 export abstract class ActivityDetector extends EventEmitter {
   protected config: ActivityConfig;
   protected streamCallbacks: Map<string, StreamActivityCallbacks> = new Map();
@@ -23,35 +19,34 @@ export abstract class ActivityDetector extends EventEmitter {
     this.config = config;
   }
 
-  /**
-   * Start monitoring for activity
-   */
+
+   //sart monitoring for activity
   public abstract start(): Promise<void>;
 
-  /**
-   * Stop monitoring for activity
-   */
+   //stop monitoring for activity
   public abstract stop(): Promise<void>;
 
-  /**
-   * Update the activity configuration
-   */
+
+   //update the activity configuration
   public updateConfig(config: Partial<ActivityConfig>): void {
     this.config = {
       ...this.config,
       ...config,
     };
-    
+
     // Emit config updated event
-    this.emit('config:updated', this.config);
+    this.emit("config:updated", this.config);
   }
 
   /**
    * Bind activity detection to a specific stream
    */
-  public bindToStream(streamId: string, callbacks: StreamActivityCallbacks): void {
+  public bindToStream(
+    streamId: string,
+    callbacks: StreamActivityCallbacks
+  ): void {
     this.streamCallbacks.set(streamId, callbacks);
-    this.emit('stream:bound', streamId);
+    this.emit("stream:bound", streamId);
   }
 
   /**
@@ -59,7 +54,7 @@ export abstract class ActivityDetector extends EventEmitter {
    */
   public unbindFromStream(streamId: string): void {
     this.streamCallbacks.delete(streamId);
-    this.emit('stream:unbound', streamId);
+    this.emit("stream:unbound", streamId);
   }
 
   /**

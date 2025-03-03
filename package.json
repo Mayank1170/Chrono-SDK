@@ -4,6 +4,7 @@
   "description": "SDK for implementing pay-per-second billing with Streamflow",
   "main": "index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",

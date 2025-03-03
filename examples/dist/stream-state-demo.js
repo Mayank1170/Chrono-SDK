@@ -117,58 +117,96 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../../.npm-global/lib/node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
-var bundleURL = null;
-function getBundleURLCached() {
-  if (!bundleURL) {
-    bundleURL = getBundleURL();
+})({"../src/stream/state.ts":[function(require,module,exports) {
+"use strict";
+
+// src/stream/state.ts
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.StreamState = void 0;
+var StreamState = /*#__PURE__*/function () {
+  function StreamState() {
+    _classCallCheck(this, StreamState);
+    this.startTime = null; // When the stream starts
+    this.totalActiveTime = 0; // Total active time in milliseconds
   }
-  return bundleURL;
-}
-function getBundleURL() {
-  // Attempt to find the URL of the current script and use that as the base URL
-  try {
-    throw new Error();
-  } catch (err) {
-    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
-    if (matches) {
-      return getBaseURL(matches[0]);
-    }
-  }
-  return '/';
-}
-function getBaseURL(url) {
-  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)?\/[^/]+(?:\?.*)?$/, '$1') + '/';
-}
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-},{}],"../../.npm-global/lib/node_modules/parcel-bundler/src/builtins/css-loader.js":[function(require,module,exports) {
-var bundle = require('./bundle-url');
-function updateLink(link) {
-  var newLink = link.cloneNode();
-  newLink.onload = function () {
-    link.remove();
-  };
-  newLink.href = link.href.split('?')[0] + '?' + Date.now();
-  link.parentNode.insertBefore(newLink, link.nextSibling);
-}
-var cssTimeout = null;
-function reloadCSS() {
-  if (cssTimeout) {
-    return;
-  }
-  cssTimeout = setTimeout(function () {
-    var links = document.querySelectorAll('link[rel="stylesheet"]');
-    for (var i = 0; i < links.length; i++) {
-      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
-        updateLink(links[i]);
+  // Start the stream
+  return _createClass(StreamState, [{
+    key: "start",
+    value: function start() {
+      if (this.startTime === null) {
+        this.startTime = Date.now();
       }
     }
-    cssTimeout = null;
-  }, 50);
-}
-module.exports = reloadCSS;
-},{"./bundle-url":"../../.npm-global/lib/node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"../../.npm-global/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+    // Pause the stream
+  }, {
+    key: "pause",
+    value: function pause() {
+      if (this.startTime !== null) {
+        this.totalActiveTime += Date.now() - this.startTime; // Add elapsed time
+        this.startTime = null; // Reset start time
+      }
+    }
+    // Resume the stream
+  }, {
+    key: "resume",
+    value: function resume() {
+      if (this.startTime === null) {
+        this.startTime = Date.now(); // Set new start time
+      }
+    }
+    // Get total active time in seconds
+  }, {
+    key: "getTotalActiveTime",
+    value: function getTotalActiveTime() {
+      if (this.startTime !== null) {
+        return Math.floor((this.totalActiveTime + (Date.now() - this.startTime)) / 1000); // Convert ms to seconds
+      }
+      return Math.floor(this.totalActiveTime / 1000); // Convert ms to seconds
+    }
+    // Reset the stream state
+  }, {
+    key: "reset",
+    value: function reset() {
+      this.startTime = null;
+      this.totalActiveTime = 0;
+    }
+  }]);
+}();
+exports.StreamState = StreamState;
+},{}],"stream-state-demo.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var state_1 = require("../src/stream/state");
+var streamState = new state_1.StreamState();
+// Simulate starting, pausing, and resuming the stream
+console.log("Starting stream...");
+streamState.start();
+setTimeout(function () {
+  console.log("Pausing stream...");
+  streamState.pause();
+  console.log("Total Active Time after pause:", streamState.getTotalActiveTime(), "seconds");
+  setTimeout(function () {
+    console.log("Resuming stream...");
+    streamState.resume();
+    setTimeout(function () {
+      console.log("Pausing stream again...");
+      streamState.pause();
+      console.log("Total Active Time after second pause:", streamState.getTotalActiveTime(), "seconds");
+    }, 2000);
+  }, 1000);
+}, 3000);
+},{"../src/stream/state":"../src/stream/state.ts"}],"../../.npm-global/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -193,7 +231,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43203" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40707" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
@@ -337,5 +375,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../.npm-global/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js"], null)
-//# sourceMappingURL=/activity-detection-demo.js.map
+},{}]},{},["../../.npm-global/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","stream-state-demo.ts"], null)
+//# sourceMappingURL=/stream-state-demo.js.map
