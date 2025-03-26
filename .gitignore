@@ -1,7 +1,7 @@
 node_modules
 dist/
-examples/.cache
-examples/dist/
+/examples/.cache
+/examples/dist/
 examples/*.d.ts
 examples/*.js
 examples/*.js.map
