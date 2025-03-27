@@ -36,7 +36,9 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@streamflow/stream": "^7.4.13",
-    "bn.js": "^5.2.1"
+    "@solana/web3.js": "^1.98.0",
+    "@streamflow/stream": "^7.4.14",
+    "bn.js": "^5.2.1",
+    "crypto-browserify": "^3.12.1"
   }
 }
