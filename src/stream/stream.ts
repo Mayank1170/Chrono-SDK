@@ -57,6 +57,7 @@ export class PayPerSecondStream {
   private recipient: string;
   private isStreamRunning: boolean = false;
   private connection: Connection;
+  private disableInactivityTimeout: boolean; // Add flag to disable inactivity timeout
 
   constructor(
     rpcUrl: string,
@@ -66,6 +67,7 @@ export class PayPerSecondStream {
       tokenDecimals: number;
       tokenId: string;
       recipient: string;
+      disableInactivityTimeout?: boolean; // Add option to disable inactivity timeout
     }
   ) {
     this.connection = new Connection(rpcUrl, {
@@ -82,6 +84,7 @@ export class PayPerSecondStream {
     this.tokenDecimals = options.tokenDecimals;
     this.tokenId = options.tokenId;
     this.recipient = options.recipient;
+    this.disableInactivityTimeout = options.disableInactivityTimeout || false; // Default to false
   }
 
   private async executeWithRetry<T>(
@@ -210,6 +213,7 @@ export class PayPerSecondStream {
   }
 
   private handleInactivity = async (): Promise<void> => {
+    if (this.disableInactivityTimeout) return; // Skip inactivity check if disabled
     const currentTime = Date.now();
     if (currentTime - this.lastActivityTime > this.inactivityTimeout && this.isStreamRunning) {
       this.pause();
@@ -248,67 +252,67 @@ export class PayPerSecondStream {
     }
   };
 
- 
   private async createStream(
     wallet: SignerWalletAdapter,
     amount: BN,
     durationSeconds: number,
     retryCount: number = 5
-): Promise<{ success: boolean; streamId?: string; error?: any }> {
+  ): Promise<{ success: boolean; streamId?: string; error?: any }> {
     try {
-        const now = Math.floor(Date.now() / 1000);
-        const start = now + 30; // Increased from 10 to 30 seconds
-        const cliff = start + 5;
+      const now = Math.floor(Date.now() / 1000);
+      const start = now + 5; // Reduced from 30 to 5 seconds
+      const cliff = start + 5;
 
-        const { value: { blockhash, lastValidBlockHeight } } = await this.connection.getLatestBlockhashAndContext("confirmed");
+      const { value: { blockhash, lastValidBlockHeight } } = await this.connection.getLatestBlockhashAndContext("confirmed");
 
-        const createStreamParams: ICreateStreamData = {
-            recipient: this.recipient,
-            tokenId: this.tokenId,
-            start,
-            amount: this.ratePerSecond.mul(new BN(durationSeconds)),
-            period: 1,
-            cliff,
-            cliffAmount: new BN(0),
-            amountPerPeriod: this.ratePerSecond,
-            name: "Pay-per-second stream",
-            canTopup: true,
-            cancelableBySender: true,
-            cancelableByRecipient: false,
-            transferableBySender: false,
-            transferableByRecipient: false,
-            automaticWithdrawal: true,
-            withdrawalFrequency: 10,
-        };
+      const createStreamParams: ICreateStreamData = {
+        recipient: this.recipient,
+        tokenId: this.tokenId,
+        start,
+        amount: this.ratePerSecond.mul(new BN(durationSeconds)),
+        period: 1,
+        cliff,
+        cliffAmount: new BN(0),
+        amountPerPeriod: this.ratePerSecond,
+        name: "Pay-per-second stream",
+        canTopup: true,
+        cancelableBySender: true,
+        cancelableByRecipient: false,
+        transferableBySender: false,
+        transferableByRecipient: false,
+        automaticWithdrawal: true,
+        withdrawalFrequency: 10,
+      };
 
-        const result = await this.client.create(
-            createStreamParams,
-            { sender: wallet, isNative: false }
-        );
-        const { txId, metadataId } = result;
+      const result = await this.client.create(
+        createStreamParams,
+        { sender: wallet, isNative: false }
+      );
+      const { txId, metadataId } = result;
 
-        const confirmed = await this.monitorTransaction(txId, lastValidBlockHeight);
-        if (!confirmed) {
-            throw new Error(`Transaction ${txId} failed to confirm within retry window`);
-        }
+      const confirmed = await this.monitorTransaction(txId, lastValidBlockHeight);
+      if (!confirmed) {
+        throw new Error(`Transaction ${txId} failed to confirm within retry window`);
+      }
 
-        console.log(`Stream transaction confirmed: ${txId}`);
-        return { success: true, streamId: metadataId };
+      console.log(`Stream transaction confirmed: ${txId}`);
+      return { success: true, streamId: metadataId };
     } catch (error) {
-        console.error("Error creating stream:", error);
-        if (error instanceof Error && (error.message.includes("expired") || error.message.includes("429")) && retryCount > 0) {
-            const backoffTime = 250 * Math.pow(2, 5 - retryCount);
-            console.log(`Transaction issue. Retrying in ${backoffTime / 1000}s... (${retryCount} attempts left)`);
-            await new Promise(res => setTimeout(res, backoffTime));
-            return this.createStream(wallet, amount, durationSeconds, retryCount - 1);
-        }
-        return { success: false, error };
+      console.error("Error creating stream:", error);
+      if (error instanceof Error && (error.message.includes("expired") || error.message.includes("429")) && retryCount > 0) {
+        const backoffTime = 250 * Math.pow(2, 5 - retryCount);
+        console.log(`Transaction issue. Retrying in ${backoffTime / 1000}s... (${retryCount} attempts left)`);
+        await new Promise(res => setTimeout(res, backoffTime));
+        return this.createStream(wallet, amount, durationSeconds, retryCount - 1);
+      }
+      return { success: false, error };
     }
-}
+  }
+
   private async monitorTransaction(
     txId: string,
     lastValidBlockHeight: number,
-    maxRetries: number = 15 // Increased from 10
+    maxRetries: number = 15
   ): Promise<boolean> {
     let attempts = 0;
     while (attempts < maxRetries) {
@@ -323,7 +327,7 @@ export class PayPerSecondStream {
           return false;
         }
         attempts++;
-        await new Promise(resolve => setTimeout(resolve, 500)); // Faster polling: 500ms
+        await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {
         console.error(`Error monitoring transaction ${txId}:`, error);
         attempts++;
@@ -333,7 +337,8 @@ export class PayPerSecondStream {
     console.log(`Transaction ${txId} failed to confirm after ${maxRetries} attempts`);
     return false;
   }
-  private async withdrawFromStream(
+
+  public async withdrawFromStream(
     streamId: string,
     wallet: SignerWalletAdapter,
     amount?: BN
