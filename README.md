@@ -30,11 +30,12 @@ RPC_ENDPOINT=https://api.devnet.solana.com
    ```bash
    npx tsx examples/create-stream-demo.ts
 ```
-## Key Notes
 
-- **Automatic Withdrawals**  
-  Requires a crank on Solana Mainnet; use manual withdrawals on Devnet.
-- **Network Reliability**  
-  Use a dedicated RPC endpoint (e.g., QuickNode) for stability.
-- **Timing Discrepancies**  
-  The script includes a fallback for withdrawal amount mismatches.
+## License
+
+ MIT License
+ 
+## Resources
+
+   - [Streamflow Docs](https://docs.streamflow.finance/)
+   - [Solana Docs](https://docs.solana.com/)
