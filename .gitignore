@@ -9,3 +9,5 @@ examples/*.js.map
 coverage/
 *.log
 .vscode/
+.tsbuildinfo
+*.js.map

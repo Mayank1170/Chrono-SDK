@@ -1,6 +1,6 @@
 // src/activity/browser.ts
-import { ActivityConfig } from '../core/types';
-import { ActivityDetector } from './detector';
+import { ActivityConfig } from '../core/types.js';
+import { ActivityDetector } from './detector.js';
 
 // Default events to track for user activity
 const DEFAULT_ACTIVITY_EVENTS = [

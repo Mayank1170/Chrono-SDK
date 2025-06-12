@@ -4,20 +4,26 @@
     "target": "ES2020",
     "lib": ["es2020", "dom"],
     "declaration": true,
+    "declarationMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "sourceMap": true
+    "sourceMap": true,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo"
   },
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": ["src/**/*", "examples"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "examples", "tests", "**/*.test.ts", "**/*.spec.ts"]
 }

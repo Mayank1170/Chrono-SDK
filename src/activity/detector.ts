@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { ActivityConfig } from "../core/types";
+import { ActivityConfig } from "../core/types.js";
 
 // Interface defining callbacks that can be registered for a stream
 export interface StreamActivityCallbacks {
