@@ -1,16 +1,30 @@
 {
-  "name": "chrono",
+  "name": "chrono-sdk",
   "version": "1.0.0",
-  "description": "SDK for implementing pay-per-second billing with Streamflow",
-  "main": "index.js",
+  "description": "SDK for implementing pay-per-second billing with Streamflow on Solana",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf dist",
+    "build:examples": "tsc --project tsconfig.examples.json",
+    "build:all": "npm run build && npm run build:examples",
+    "clean": "rimraf dist dist-examples",
     "dev": "tsc --watch",
     "lint": "eslint 'src/**/*.{js,ts}'",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
+    "prepublishOnly": "npm run build",
     "prepare": "npm run build"
   },
   "keywords": [
@@ -22,6 +36,14 @@
   ],
   "author": "Mayank Agarwal",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mayank1170/Chrono-SDK.git"
+  },
+  "homepage": "https://github.com/Mayank1170/Chrono-SDK",
+  "bugs": {
+    "url": "https://github.com/Mayank1170/Chrono-SDK/issues"
+  },
   "devDependencies": {
     "@types/bn.js": "^5.1.6",
     "@types/events": "^3.0.3",
