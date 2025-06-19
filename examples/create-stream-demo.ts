@@ -1,7 +1,7 @@
 import '../src/utils/crypto-polyfill';
 import { Keypair, Connection, PublicKey, LAMPORTS_PER_SOL, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import { createMint, getOrCreateAssociatedTokenAccount, createMintToInstruction } from "@solana/spl-token";
-import { PayPerSecondStream } from "./../src/stream/stream";
+import { PayPerSecondStream } from "../src/stream/stream";
 import { KeypairAdapter } from "../src/adapters/KeypairAdapter";
 import * as dotenv from 'dotenv';
 import BN from "bn.js";
